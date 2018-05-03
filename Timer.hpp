@@ -59,7 +59,7 @@ public:
    *
    * @return  Returns the total elapsed duration for which the timer was running.
    */
-  template <typename DurationType = MilliSeconds>
+  template <typename DurationType = Seconds>
   float 
   elapsed() const
   {
