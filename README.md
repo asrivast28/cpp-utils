@@ -4,6 +4,9 @@ This repository intends to provide common utils used in C++ coding, all in one p
 Not everything is my original work. Please refer to the list below or the individual files for the authorship information.
 
 ## Components
+* **Logging.hpp**  
+This file uses [Boost.Log](https://www.boost.org/doc/libs/1_71_0/libs/log/doc/html/index.html) library for providing logging functionality.  
+It requires the `boost_log`, `boost_system`, and `pthread` libraries.
 * **Timer.hpp**  
 This file uses C++ [std::chrono](http://en.cppreference.com/w/cpp/header/chrono) library for providing timing functionality.
 * **prettyprint.hpp**  
