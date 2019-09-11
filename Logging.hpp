@@ -19,6 +19,34 @@
 #include <boost/log/expressions.hpp>
 
 
+boost::log::trivial::severity_level
+log_severity(
+  const std::string& level
+)
+{
+  if (level == "trace") {
+    return boost::log::trivial::trace;
+  }
+  else if (level == "debug") {
+    return boost::log::trivial::debug;
+  }
+  else if (level == "info") {
+    return boost::log::trivial::info;
+  }
+  else if (level == "warning") {
+    return boost::log::trivial::warning;
+  }
+  else if (level == "error") {
+    return boost::log::trivial::error;
+  }
+  else if (level == "fatal") {
+    return boost::log::trivial::fatal;
+  }
+  else {
+    return boost::log::trivial::info;
+  }
+}
+
 std::string
 format_helper(
   boost::format& f
@@ -50,7 +78,9 @@ debug_log(
 }
 
 // Initialize logging
-#define INIT_LOGGING(level) boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::level);
+#define INIT_LOGGING(level) boost::log::core::get()->set_filter(boost::log::trivial::severity >= log_severity(level));
+
+// Logging macros
 #define DEBUG_LOG(level, fmt, ...) BOOST_LOG_TRIVIAL(level) <<  debug_log(fmt, __VA_ARGS__);
 #define DEBUG_LOG_IF(exp, level, fmt, ...) if (exp) DEBUG_LOG(level, fmt, __VA_ARGS__);
 
