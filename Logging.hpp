@@ -49,13 +49,15 @@ debug_log(
   return format_helper(f, std::forward<Args>(args)...);
 }
 
-// Initialize logging 
+// Initialize logging
 #define INIT_LOGGING(level) boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::level);
 #define DEBUG_LOG(level, fmt, ...) BOOST_LOG_TRIVIAL(level) <<  debug_log(fmt, __VA_ARGS__);
+#define DEBUG_LOG_IF(exp, level, fmt, ...) if (exp) DEBUG_LOG(level, fmt, __VA_ARGS__);
 
 #else
 #define INIT_LOGGING(level)
-#define DEBUG_LOG(...)
+#define DEBUG_LOG(level, fmt, ...)
+#define DEBUG_LOG_IF(exp, level, fmt, ...)
 #endif
 
 #endif // LOGGING_HPP_
