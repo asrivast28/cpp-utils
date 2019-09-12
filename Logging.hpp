@@ -81,13 +81,13 @@ log_message(
 #define INIT_LOGGING(level) boost::log::core::get()->set_filter(boost::log::trivial::severity >= log_severity(level));
 
 // Logging macros
-#define LOG_MESSAGE(level, fmt, ...) BOOST_LOG_TRIVIAL(level) <<  log_message(fmt, __VA_ARGS__);
-#define LOG_MESSAGE_IF(exp, level, fmt, ...) if (exp) LOG_MESSAGE(level, fmt, __VA_ARGS__);
+#define LOG_MESSAGE(level, ...) BOOST_LOG_TRIVIAL(level) <<  log_message(__VA_ARGS__);
+#define LOG_MESSAGE_IF(exp, level, ...) if (exp) LOG_MESSAGE(level, __VA_ARGS__);
 
 #else
 #define INIT_LOGGING(level)
-#define LOG_MESSAGE(level, fmt, ...)
-#define LOG_MESSAGE_IF(exp, level, fmt, ...)
+#define LOG_MESSAGE(level, ...)
+#define LOG_MESSAGE_IF(exp, level, ...)
 #endif
 
 #endif // LOGGING_HPP_

@@ -60,7 +60,7 @@ public:
    * @return  Returns the total elapsed duration for which the timer was running.
    */
   template <typename DurationType = Seconds>
-  float 
+  float
   elapsed() const
   {
     std::chrono::steady_clock::duration d = m_duration;
