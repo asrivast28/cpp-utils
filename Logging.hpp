@@ -6,8 +6,8 @@
 #ifndef LOGGING_HPP_
 #define LOGGING_HPP_
 
-// Use logging only when NDEBUG flag is not defined
-#ifndef NDEBUG
+// Use logging only when LOGGING flag is defined
+#ifdef LOGGING
 
 #include <string>
 
@@ -68,7 +68,7 @@ format_helper(
 
 template <typename... Args>
 std::string
-debug_log(
+log_message(
   const std::string& fmt,
   Args&&... args
 )
@@ -81,13 +81,13 @@ debug_log(
 #define INIT_LOGGING(level) boost::log::core::get()->set_filter(boost::log::trivial::severity >= log_severity(level));
 
 // Logging macros
-#define DEBUG_LOG(level, fmt, ...) BOOST_LOG_TRIVIAL(level) <<  debug_log(fmt, __VA_ARGS__);
-#define DEBUG_LOG_IF(exp, level, fmt, ...) if (exp) DEBUG_LOG(level, fmt, __VA_ARGS__);
+#define LOG_MESSAGE(level, fmt, ...) BOOST_LOG_TRIVIAL(level) <<  log_message(fmt, __VA_ARGS__);
+#define LOG_MESSAGE_IF(exp, level, fmt, ...) if (exp) LOG_MESSAGE(level, fmt, __VA_ARGS__);
 
 #else
 #define INIT_LOGGING(level)
-#define DEBUG_LOG(level, fmt, ...)
-#define DEBUG_LOG_IF(exp, level, fmt, ...)
+#define LOG_MESSAGE(level, fmt, ...)
+#define LOG_MESSAGE_IF(exp, level, fmt, ...)
 #endif
 
 #endif // LOGGING_HPP_
