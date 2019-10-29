@@ -31,6 +31,16 @@ public:
   }
 
   /**
+   * @brief  Function for resetting the timer.
+   */
+  void
+  reset()
+  {
+    m_duration = std::chrono::steady_clock::duration::zero();
+    m_running = false;
+  }
+
+  /**
    * @brief  Function for starting/resetting the timer.
    */
   void
