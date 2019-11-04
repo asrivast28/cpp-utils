@@ -6,7 +6,12 @@
 #ifndef TIMER_HPP_
 #define TIMER_HPP_
 
+// Use logging only when LOGGING flag is defined
+#ifdef TIMER
+
 #include <chrono>
+#include <iostream>
+
 
 class Timer {
 public:
@@ -93,5 +98,25 @@ private:
   std::chrono::steady_clock::duration m_duration;
   bool m_running;
 }; // class Timer
+
+#define TIMER_DECLARE(var, ...) __VA_ARGS__ Timer var
+#define TIMER_RESET(var) var.reset()
+#define TIMER_START(var) var.start()
+#define TIMER_PAUSE(var) var.pause()
+#define TIMER_ELAPSED(msg, var) \
+  std::cout << msg << var.elapsed() << std::endl;
+#define TIMER_ELAPSED_NONZERO(msg, var) \
+  if (std::isgreater(var.elapsed(), 0.0)) { \
+    std::cout << msg << var.elapsed() << std::endl; \
+  }
+
+#else
+#define TIMER_DECLARE(var, ...)
+#define TIMER_RESET(var)
+#define TIMER_START(var)
+#define TIMER_PAUSE(var)
+#define TIMER_ELAPSED(msg, var)
+#define TIMER_ELAPSED_NONZERO(msg, var)
+#endif // TIMER
 
 #endif // TIMER_HPP_
