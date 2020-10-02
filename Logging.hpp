@@ -26,56 +26,121 @@
 
 namespace logging = boost::log;
 
-logging::trivial::severity_level
-log_severity(
-  const std::string& level
-)
-{
-  logging::trivial::severity_level sl;
-  if (!logging::trivial::from_string(level.c_str(), level.length(), sl)) {
-    sl = logging::trivial::info;
-  }
-  return sl;
-}
-
-std::string
-format_helper(
-  boost::format& f
-)
-{
-  return boost::str(f);
-}
-
-template <typename T, typename... Args>
-std::string
-format_helper(
-  boost::format& f,
-  T&& t,
-  Args&&... args
-)
-{
-  return format_helper(f % std::forward<T>(t), std::forward<Args>(args)...);
-}
-
-template <typename... Args>
-std::string
-log_message(
-  const std::string& fmt,
-  Args&&... args
-)
-{
-  boost::format f(fmt);
-  return format_helper(f, std::forward<Args>(args)...);
-}
-
 BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", logging::trivial::severity_level)
 BOOST_LOG_ATTRIBUTE_KEYWORD(channel, "Channel", int)
 using logger_type = logging::sources::severity_channel_logger<logging::trivial::severity_level, int>;
 
 /**
- * @brief Class for providing a singleton instance of the logger.
+ * @brief Class which provides the logging functionality.
  */
 class Logger {
+private:
+  /**
+   * @brief Static function for getting the singleton instance
+   *        of this class.
+   */
+  static
+  Logger&
+  get()
+  {
+    static Logger instance;
+    return instance;
+  }
+
+  /**
+   * @brief Static function for getting the severity level from
+   *        its string representation.
+   */
+  static
+  logging::trivial::severity_level
+  severity(
+    const std::string& level
+  )
+  {
+    logging::trivial::severity_level sl;
+    if (!logging::trivial::from_string(level.c_str(), level.length(), sl)) {
+      sl = logging::trivial::info;
+    }
+    return sl;
+  }
+
+  static
+  std::string
+  format_helper(
+    boost::format& f
+  )
+  {
+    return boost::str(f);
+  }
+
+  template <typename T, typename... Args>
+  static
+  std::string
+  format_helper(
+    boost::format& f,
+    T&& t,
+    Args&&... args
+  )
+  {
+    return Logger::format_helper(f % std::forward<T>(t), std::forward<Args>(args)...);
+  }
+
+public:
+  /**
+   * @brief Static function for initializing logging.
+   *
+   * @param file The name of the file to be used for logging.
+   *             Console is used if the name is empty.
+   * @param tag The tag to be used for logging to channels.
+   *            Useful for logging from multiple processes.
+   * @param level Minimum severity level of messages to be logged.
+   */
+  static
+  void
+  init(
+    const std::string& file,
+    const int tag,
+    const std::string& level
+  )
+  {
+    if (file == "") {
+      logging::add_console_log(
+        std::cerr,
+        logging::keywords::format = "[%Severity%] %Channel%: %Message%"
+      );
+    }
+    else {
+      logging::add_file_log(
+        logging::keywords::file_name = file,
+        logging::keywords::filter = (channel == tag),
+        logging::keywords::format = "[%Severity%] %Message%"
+      );
+    }
+    Logger::get().set(logger_type(logging::keywords::channel = tag));
+    logging::core::get()->set_filter(logging::trivial::severity >= severity(level));
+  }
+
+  /**
+   * @brief Static function for logging a message.
+   *
+   * @tparam Args Type of the variable formatter arguments.
+   * @param sl Severity level of the message.
+   * @param fmt Format string of the message.
+   * @param args Formatting args for the message.
+   */
+  template <typename... Args>
+  static
+  void
+  message(
+    const logging::trivial::severity_level sl,
+    const std::string& fmt,
+    Args&&... args
+  )
+  {
+    boost::format f(fmt);
+    BOOST_LOG_SEV(*(Logger::get()), sl) << Logger::format_helper(f, std::forward<Args>(args)...);
+  }
+
 public:
   /**
    * @brief Default constructor.
@@ -97,6 +162,14 @@ public:
   operator=(const Logger&) = delete;
 
   /**
+   * @brief Default destructor.
+   */
+  ~Logger()
+  {
+  }
+
+private:
+  /**
    * @brief Function for setting the underlying logger.
    */
   void
@@ -114,51 +187,19 @@ public:
     return m_logger;
   }
 
-  /**
-   * @brief Default destructor.
-   */
-  ~Logger()
-  {
-  }
-
-public:
-  /**
-   * @brief Function for getting the singleton instance.
-   */
-  static
-  Logger&
-  get()
-  {
-    static Logger instance;
-    return instance;
-  }
-
 private:
   logger_type m_logger;
 }; // class Logger
 
-
-// Initialize logging
-#define INIT_LOGGING(file, tag, level) \
-  if (file == "") { \
-    logging::add_console_log(std::cerr, logging::keywords::format = "[%Severity%] %Channel%: %Message%"); \
-  } \
-  else { \
-    logging::add_file_log(logging::keywords::file_name = file, logging::keywords::filter = (channel == tag), logging::keywords::format = "[%Severity%] %Message%"); \
-  } \
-  Logger::get().set(logger_type(logging::keywords::channel = tag)); \
-  logging::core::get()->set_filter(logging::trivial::severity >= log_severity(level))
-
-// Logging macros
-#define LOG_MESSAGE(level, ...) \
-  BOOST_LOG_SEV(*(Logger::get()), logging::trivial::level) << log_message(__VA_ARGS__)
-#define LOG_MESSAGE_IF(exp, level, ...) \
-  if (exp) LOG_MESSAGE(level, __VA_ARGS__)
+// Macros for logging
+#define INIT_LOGGING(file, tag, level) Logger::init(file, tag, level)
+#define LOG_MESSAGE(level, ...) Logger::message(logging::trivial::level, __VA_ARGS__)
+#define LOG_MESSAGE_IF(exp, level, ...) if (exp) Logger::message(logging::trivial::level, __VA_ARGS__)
 
 #else
 #define INIT_LOGGING(file, tag, level)
 #define LOG_MESSAGE(level, ...)
 #define LOG_MESSAGE_IF(exp, level, ...)
-#endif
+#endif // LOGGING
 
 #endif // LOGGING_HPP_
