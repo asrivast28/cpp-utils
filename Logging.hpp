@@ -121,6 +121,33 @@ public:
   }
 
   /**
+   * @brief Static function for re-enabling loggging,
+   *        if it was disabled.
+   */
+  static
+  void
+  enable()
+  {
+    if (!logging::core::get()->get_logging_enabled()) {
+      logging::core::get()->set_logging_enabled(true);
+    }
+  }
+
+  /**
+   * @brief Static function for disabling loggging,
+   *        if it was enabled.
+   */
+  static
+  void
+  disable()
+  {
+    if (logging::core::get()->get_logging_enabled()) {
+      logging::core::get()->flush();
+      logging::core::get()->set_logging_enabled(false);
+    }
+  }
+
+  /**
    * @brief Static function for logging a message.
    *
    * @tparam Args Type of the variable formatter arguments.
@@ -193,11 +220,15 @@ private:
 
 // Macros for logging
 #define INIT_LOGGING(file, tag, level) Logger::init(file, tag, level)
+#define START_LOGGING() Logger::enable()
+#define PAUSE_LOGGING() Logger::disable()
 #define LOG_MESSAGE(level, ...) Logger::message(logging::trivial::level, __VA_ARGS__)
 #define LOG_MESSAGE_IF(exp, level, ...) if (exp) Logger::message(logging::trivial::level, __VA_ARGS__)
 
 #else
 #define INIT_LOGGING(file, tag, level)
+#define START_LOGGING()
+#define PAUSE_LOGGING()
 #define LOG_MESSAGE(level, ...)
 #define LOG_MESSAGE_IF(exp, level, ...)
 #endif // LOGGING
