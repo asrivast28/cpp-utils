@@ -168,6 +168,18 @@ public:
     BOOST_LOG_SEV(*(Logger::get()), sl) << Logger::format_helper(f, std::forward<Args>(args)...);
   }
 
+  /**
+   * @brief Static function for flushing log messages.
+   */
+  static
+  void
+  flush()
+  {
+    if (logging::core::get()->get_logging_enabled()) {
+      logging::core::get()->flush();
+    }
+  }
+
 public:
   /**
    * @brief Default constructor.
@@ -224,6 +236,7 @@ private:
 #define PAUSE_LOGGING() Logger::disable()
 #define LOG_MESSAGE(level, ...) Logger::message(logging::trivial::level, __VA_ARGS__)
 #define LOG_MESSAGE_IF(exp, level, ...) if (exp) Logger::message(logging::trivial::level, __VA_ARGS__)
+#define FLUSH_MESSAGES() Logger::flush()
 
 #else
 #define INIT_LOGGING(file, tag, level)
@@ -231,6 +244,7 @@ private:
 #define PAUSE_LOGGING()
 #define LOG_MESSAGE(level, ...)
 #define LOG_MESSAGE_IF(exp, level, ...)
+#define FLUSH_MESSAGES()
 #endif // LOGGING
 
 #endif // LOGGING_HPP_
