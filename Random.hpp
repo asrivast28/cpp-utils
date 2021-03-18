@@ -38,6 +38,7 @@ discrete_distribution_pick(
     picked = distrib(generator);
   }
   else {
+    generator.discard(1);
     picked = std::distance(first, it);
   }
   return picked;
